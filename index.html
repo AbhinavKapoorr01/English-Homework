@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>English Homework</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<!-- Firebase CDN -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+
+body{
+  min-height:100vh;
+  background:linear-gradient(135deg,#141e30,#243b55);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:white;
+}
+
+.card{
+  width:95%;
+  max-width:900px;
+  background:rgba(255,255,255,0.12);
+  backdrop-filter:blur(20px);
+  border-radius:25px;
+  padding:35px;
+  box-shadow:0 30px 60px rgba(0,0,0,0.4);
+  animation:fade 1s ease;
+}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;}
+}
+
+h1{
+  text-align:center;
+  font-size:36px;
+}
+
+.date{
+  text-align:center;
+  margin-bottom:25px;
+  opacity:.9;
+}
+
+.box{
+  background:rgba(255,255,255,0.15);
+  padding:22px;
+  border-radius:18px;
+  margin-top:25px;
+}
+
+input, textarea{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  outline:none;
+  margin-top:12px;
+  font-size:16px;
+}
+
+textarea{
+  height:140px;
+  resize:none;
+}
+
+button{
+  margin-top:15px;
+  background:#00ffd5;
+  border:none;
+  padding:12px 30px;
+  border-radius:30px;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.3s;
+}
+
+button:hover{
+  transform:scale(1.05);
+  background:#00c9a7;
+}
+
+.hidden{display:none;}
+
+.footer{
+  text-align:center;
+  margin-top:40px;
+  font-size:16px;
+  font-weight:600;
+  animation:glow 2s infinite alternate;
+}
+
+.footer a{
+  text-decoration:none;
+  background:linear-gradient(90deg,#00ffd5,#ff00ff,#00ffd5);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-size:200% auto;
+  animation:gradientMove 3s linear infinite;
+}
+
+@keyframes glow{
+  from{ text-shadow:0 0 5px #00ffd5; }
+  to{ text-shadow:0 0 20px #ff00ff; }
+}
+
+@keyframes gradientMove{
+  0%{background-position:0% center;}
+  100%{background-position:200% center;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>📘 English Homework</h1>
+<div class="date" id="date"></div>
+
+<div class="box">
+  <h3>Today's Homework</h3>
+  <p id="homework">Loading...</p>
+</div>
+
+<div class="box" id="loginBox">
+  <h3>🔐 Admin Login</h3>
+  <input type="email" id="email" placeholder="Admin Email">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+</div>
+
+<div class="box hidden" id="adminPanel">
+  <h3>✏️ Update Homework</h3>
+  <textarea id="hw" placeholder="Enter today's homework"></textarea>
+  <button onclick="saveHomework()">Update Homework</button>
+</div>
+
+<div class="footer">
+  Created by 
+  <a href="https://www.instagram.com/abhinav_kapoorr_" target="_blank">
+    Abhinav Kapoor
+  </a>
+</div>
+
+</div>
+
+<script>
+// 🔥 PASTE YOUR FIREBASE CONFIG BELOW
+const firebaseConfig = {
+  apiKey: "PASTE_HERE",
+  authDomain: "PASTE_HERE",
+  projectId: "PASTE_HERE",
+  storageBucket: "PASTE_HERE",
+  messagingSenderId: "PASTE_HERE",
+  appId: "PASTE_HERE"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Date
+document.getElementById("date").innerText =
+  "Date: " + new Date().toDateString();
+
+// Firestore reference
+const docRef = db.collection("homework").doc("today");
+
+// Live homework update
+docRef.onSnapshot(doc => {
+  if(doc.exists){
+    document.getElementById("homework").innerText = doc.data().text;
+  } else {
+    document.getElementById("homework").innerText =
+      "No homework updated yet.";
+  }
+});
+
+// Admin login
+function login(){
+  auth.signInWithEmailAndPassword(
+    document.getElementById("email").value,
+    document.getElementById("password").value
+  )
+  .then(()=>{
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("adminPanel").classList.remove("hidden");
+  })
+  .catch(err=>alert(err.message));
+}
+
+// Save homework
+function saveHomework(){
+  docRef.set({
+    text: document.getElementById("hw").value,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+</script>
+
+</body>
+</html>
